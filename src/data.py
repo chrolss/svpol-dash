@@ -3,7 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.sql.elements import quoted_name
 
 def load_from_db(table: str):
-    engine = create_engine("sqlite:////home/chrolss/PycharmProjects/svpol/data/tweets.db")
+    #engine = create_engine("sqlite:////home/chrolss/PycharmProjects/svpol/data/tweets.db")
+    engine = create_engine("sqlite:///data/tweets.db")
     con = engine.connect()
     query = "SELECT * FROM {0}".format(table)
     res = con.execute(query)
