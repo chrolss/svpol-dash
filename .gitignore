@@ -5,3 +5,4 @@ data/models/model.pkl
 *.pyc
 src/__pycache__/data.cpython-38.pyc
 src/__pycache__/ml.cpython-38.pyc
+nltk_data/*

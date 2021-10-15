@@ -62,15 +62,17 @@ app.layout = html.Div(children=[
         html.H3(children="Predict political leanings in Swedish text"),
         dcc.RadioItems(id="ml_radio",
         options=[
-            {"label": "Twitter handle", "value": "twitter_handle"},
+            #{"label": "Twitter handle", "value": "twitter_handle"},
             {"label": "Free text", "value": "free_text"} 
         ],
-        value="twitter_handle"
+        value="free_text"
         ),
         html.Div(
-            dcc.Input(id='input-on-submit', type='text')),
-            html.Button('Predict', id='submit-val', n_clicks=0),
-            html.Div(id='container-button-basic',children='Enter a value and press submit')
+            dcc.Textarea(id="input-on-submit", 
+            placeholder="Paste your text here and press Predict", 
+            style={"width": "20%", "heigth": 100})
+        ),
+            html.Button('Predict', id='submit-val', n_clicks=0)
     ]),
     # Div that holds the ML outputs - bar chart
     html.Div([
@@ -95,7 +97,7 @@ app.layout = html.Div(children=[
     dcc.Graph(id="timeseries"),
 
     html.Div([
-        html.H3(children="Party Support from polling institutes"),
+        html.H3(children="Party support from polling institutes"),
         html.Div([
             dcc.Dropdown(
                 id="dropdown_polling_company",
@@ -121,7 +123,6 @@ app.layout = html.Div(children=[
 
     html.Div([
         html.H3(children="Party support over time from polling institutes"),
-        # Change to rangeslider and do some datetime magic to make it look better
         html.Div([
             dcc.Dropdown(
                 id="dropdown_polling_company_timeseries",
@@ -145,7 +146,6 @@ app.layout = html.Div(children=[
 
         dcc.Graph(
             id="party_lines"
-            #figure = px.line(polls[polls["publdate"] > "1900-01-01"], x="publdate", y="support", color="party")
         )
     ])
 ])

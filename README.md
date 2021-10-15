@@ -4,6 +4,9 @@
 To access the app when it has been pushed to heroku, we need to expose the $PORT environment variable. 
 We use this both in `app.py` and in the `Dockerfile`.
 
+### Login and authenticate to Heroku
+??
+
 #### Build and push the image to Heroku
 `sudo heroku container:push web -a svpol-analytics`
 
