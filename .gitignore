@@ -1,6 +1,5 @@
 data/tweets.db
 data/partisympatier.pkl
-data/models/cv.pkl
-data/models/model.pkl
+data/models/*
 *.pyc
 nltk_data/*

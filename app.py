@@ -205,7 +205,9 @@ def run_and_display_ml_predictions(n_clicks, ml_prediction_type, ml_text_input):
         })
     else:
         processed_data = data_preprocessing(ml_text_input)
-        new_predictions_df = load_and_predict_model("data/models/model.pkl", "data/models/cv.pkl", processed_data)
+        new_predictions_df = load_and_predict_model("data/models/model.pkl", 
+                                                    "data/models/pipe.pkl", 
+                                                    processed_data)
 
     # Create the bar chart
     new_ml_bar = px.bar(new_predictions_df, 

@@ -8,11 +8,11 @@ from nltk import TweetTokenizer
 import lemmy
 
 
-def load_and_predict_model(model_path: str, cv_path: str, input_text: str):
+def load_and_predict_model(model_path: str, pipe_path: str, input_text: str):
     model = joblib.load(model_path)
-    cv = joblib.load(cv_path)
+    pipe = joblib.load(pipe_path)
 
-    word_vector = cv.transform([input_text])
+    word_vector = pipe.transform([input_text])
     predictions = model.predict_proba(word_vector)
 
     pred_df = pd.DataFrame({
