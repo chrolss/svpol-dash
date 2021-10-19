@@ -5,7 +5,7 @@ import plotly.express as px
 from dash.dependencies import Input, Output, State
 import pandas as pd
 from datetime import datetime
-from src.data import load_from_db
+from src.data import DataLoader
 from src.ml import load_and_predict_model, data_preprocessing
 import plotly.io as pio
 
@@ -33,22 +33,14 @@ support_labels = {
     "likeness": "Similarity (%)"
 }
 
-# Machine learning baseline
-ml_baseline = pd.DataFrame(
-    {
-        "party": ["M", "KD", "L", "C", "S", "MP", "V", "SD"],
-        "likeness": [10, 10, 10, 10, 10, 10, 10, 10,]
-    })
-ml_bar = px.bar(ml_baseline, 
-                x="party", 
-                y="likeness")
+# Instatiate DataLoader
+DataLoader = DataLoader()
 
 # Load hashtag data
-hashtags = load_from_db("hashtags")
-hashtags["date"] = pd.to_datetime(hashtags["date"])
+hashtags = DataLoader.load_hashtags()
 
 # Load party poll numbers
-polls = pd.read_pickle("data/partisympatier.pkl")
+polls = DataLoader.load_party_poll_numbers()
 
 # Begin app layout
 app.layout = html.Div(children=[
@@ -60,25 +52,32 @@ app.layout = html.Div(children=[
     # Machine Learning part of the app
     html.Div([
         html.H3(children="Predict political leanings in Swedish text"),
-        dcc.RadioItems(id="ml_radio",
-        options=[
-            #{"label": "Twitter handle", "value": "twitter_handle"},
-            {"label": "Free text", "value": "free_text"} 
-        ],
-        value="free_text"
-        ),
-        html.Div(
-            dcc.Textarea(id="input-on-submit", 
-            placeholder="Paste your text here and press Predict", 
-            style={"width": "20%", "heigth": 100})
-        ),
-            html.Button('Predict', id='submit-val', n_clicks=0)
-    ]),
+        html.Div(children="""
+            This graph below is powered by a machine learning model. A gradient boosted tree to be specific. The model was trained on 
+            tweets from political Swedish twitter accounts, as well as the respective party website of each Swedish parliamentary party.
+            Paste some Swedish text into the text field and hit "Predict" to get a similarity score for the political leaning of your text.
+            Note: the model is still under refinement - don't expect miracles yet :) 
+        """, style={'width': '45%', 'display': 'inline-block', "padding-right": "2%"}),
+        html.Div([
+            dcc.RadioItems(id="ml_radio",
+            options=[
+                #{"label": "Twitter handle", "value": "twitter_handle"},
+                {"label": "Free text", "value": "free_text"} 
+            ],
+            value="free_text"
+            ),
+            html.Div(
+                dcc.Textarea(id="input-on-submit", 
+                placeholder="Paste your text here and press Predict", 
+                style={"width": "100%", "heigth": "100%", "rows": 5, "resize": "none"})
+            ),
+                html.Button('Predict', id='submit-val', n_clicks=0)
+            ], style={'width': '45%', 'display': 'inline-block'})
+        ]),
     # Div that holds the ML outputs - bar chart
     html.Div([
-        dcc.Graph(id="ml_prediction_bargraph",
-        figure=ml_bar)
-    ]),
+        dcc.Graph(id="ml_prediction_bargraph")
+    ], style={"padding-top": "2%"}),
 
     # Statistical part of the app
     html.Div([
@@ -86,7 +85,8 @@ app.layout = html.Div(children=[
         dcc.Dropdown(
             id="dropdown_hashtag",
             options=[{"label": x, "value": x} 
-                    for x in hashtags["hashtag"].unique().tolist()[0:10]],
+                    #for x in hashtags["hashtag"].unique().tolist()[0:10]],
+                    for x in DataLoader.get_list_of_trending_hashtags()],
             value="#svpol",
             clearable=False,
             style = {"color": "black"},
@@ -140,7 +140,7 @@ app.layout = html.Div(children=[
                 max=2021,
                 step=None,
                 marks={i: str(i) for i in range(2000, 2022)},
-                value=[2000, 2011]
+                value=[2000, 2021]
             )
         ], style={'width': '66%', 'display': 'inline-block', "color": "white"}),
 
@@ -158,7 +158,7 @@ app.layout = html.Div(children=[
 )
 def display_party_lines_timeseries(polling_company, year_range):
     # Figure for party support over times
-    party_lines_df = polls[(polls["publdate"] >= "{0}-01-01".format(year_range[0])) & (polls["publdate"] <= "{0}-12-31".format(year_range[1]))]
+    party_lines_df = DataLoader.load_party_poll_numbers(publ_year_start=year_range[0], publ_year_end=year_range[1])
     party_lines_df = party_lines_df[party_lines_df["company"] == polling_company]
     fig = px.line(party_lines_df, 
                     x="publdate", 
@@ -175,7 +175,7 @@ def display_party_lines_timeseries(polling_company, year_range):
 )
 def display_hashtag_timeseries(dropdown_hashtag):
     # Figure for hashtag timeseires
-    hashtag_df = hashtags[hashtags["hashtag"] == dropdown_hashtag]
+    hashtag_df = DataLoader.load_hashtags(filter=dropdown_hashtag)
     hashtag_df.sort_values(by="date", inplace=True)
 
     fig = px.line(hashtag_df,
@@ -201,7 +201,7 @@ def run_and_display_ml_predictions(n_clicks, ml_prediction_type, ml_text_input):
         new_predictions_df = pd.DataFrame(
         {
             "party": ["M", "KD", "L", "C", "S", "MP", "V", "SD"],
-            "likeness": [random.randint(0, 100) for i in range(8)]
+            "likeness": [random.randint(0, 20) for i in range(8)]
         })
     else:
         processed_data = data_preprocessing(ml_text_input)
