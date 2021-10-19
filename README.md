@@ -9,6 +9,7 @@ The app is built in python using plotly dash, and is hosted on heroku.com as a D
 - [x] Implement basic structure for ML inference part
 - [x] Implement basic structure for Tweet analytics
 - [x] Implement basic structure for party polling numbers analytics
+- [x] Implement DataLoader dataclass to handle all data reading and manipulation
 - [ ] Add "% of" analytics on trending hashtags
 - [ ] Add trending hashtag horizons (e.g. last 5 days, 10 days)
 - [ ] Add vertical lines in line graphs to indicate significant events (e.g. debates)
@@ -29,7 +30,7 @@ We use this both in `app.py` and in the `Dockerfile`.
 `sudo heroku container:release web -a svpol-analytics`
 
 #### View the logs of the application
-`sudo heroku logs --tail`
+`sudo heroku logs --tail -a svpol-analytics`
 
 #### Take the app down
 Go to heroku.com and visit the apps page. Go to "Settings" and toggle "Maintenance Mode".

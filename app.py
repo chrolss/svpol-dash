@@ -2,12 +2,14 @@ import dash
 from dash import dcc
 from dash import html
 import plotly.express as px
+import plotly.io as pio
 from dash.dependencies import Input, Output, State
 import pandas as pd
+import random
 from datetime import datetime
 from src.data import DataLoader
 from src.ml import load_and_predict_model, data_preprocessing
-import plotly.io as pio
+
 
 app = dash.Dash(__name__)
 pio.templates.default = "plotly_dark"
@@ -82,18 +84,43 @@ app.layout = html.Div(children=[
     # Statistical part of the app
     html.Div([
         html.H3(children="Hashtag mentions over time"),
-        dcc.Dropdown(
+        html.Div(children="""
+            Select a hashtag from the dropdown menu to see its usage over time together with
+            the main Swedish political twitter hashtag #svpol.
+        """, style={"bottom-padding": "2%"}),
+    ]),
+    html.Div([
+        html.Div([
+            dcc.Dropdown(
             id="dropdown_hashtag",
             options=[{"label": x, "value": x} 
-                    #for x in hashtags["hashtag"].unique().tolist()[0:10]],
                     for x in DataLoader.get_list_of_trending_hashtags()],
             value="#svpol",
             clearable=False,
-            style = {"color": "black"},
-        )
-    ], style={'width': '33%', 'display': 'inline-block'}
-    ),
-
+        )], style = {"width": "33%", "color": "black", "display": "inline-block"}),
+        html.Div([
+            dcc.Slider(
+                id="slider_hashtag_horizon",
+                min=1,
+                max=30,
+                step=1,
+                value=5,
+            )], style = {
+                    "width": "33%", 
+                    "display": "inline-block", 
+                    "-ms-transform": "translateY(+50%)",
+                    "transform": "translateY(+50%)"
+                    }
+                ),
+        html.Div(id="slider_label", 
+                style={
+                    "width": "33%", 
+                    "display": "inline-block", 
+                    "color": "red","-ms-transform": "translateY(-50%)",
+                    "transform": "translateY(-50%)"}
+                    ),
+    ]),
+    
     dcc.Graph(id="timeseries"),
 
     html.Div([
@@ -170,6 +197,24 @@ def display_party_lines_timeseries(polling_company, year_range):
     return fig
 
 @app.callback(
+    dash.dependencies.Output('slider_label', 'children'),
+    [dash.dependencies.Input('slider_hashtag_horizon', 'value')])
+def update_output(value):
+    return 'Trending hashtags during the last {0} days'.format(value)
+
+@app.callback(
+    Output("dropdown_hashtag", "options"),
+    [Input("slider_hashtag_horizon", "value")]
+)
+def update_dropdown_hashtag(horizon):
+    list_options = DataLoader.get_list_of_trending_hashtags(nr_of_days=horizon)
+    new_options = [
+        {"label": x, "value": x}
+        for x in list_options]
+    
+    return new_options
+
+@app.callback(
     Output("timeseries", "figure"),
     [Input("dropdown_hashtag", "value")]
 )
@@ -196,7 +241,6 @@ def display_hashtag_timeseries(dropdown_hashtag):
 )
 def run_and_display_ml_predictions(n_clicks, ml_prediction_type, ml_text_input):    
     # Code for handling input and running predictions
-    import random
     if ml_text_input is None:
         new_predictions_df = pd.DataFrame(
         {
