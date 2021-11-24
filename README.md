@@ -23,6 +23,12 @@ We use this both in `app.py` and in the `Dockerfile`.
 ### Login and authenticate to Heroku
 `sudo heroku login`
 
+### Set the stack
+`sudo heroku stack:set -a svpol-analytics`
+
+### Login to the container
+`sudo heroku container:login`
+
 #### Build and push the image to Heroku
 `sudo heroku container:push web -a svpol-analytics`
 
