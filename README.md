@@ -10,11 +10,12 @@ The app is built in python using plotly dash, and is hosted on heroku.com as a D
 - [x] Implement basic structure for Tweet analytics
 - [x] Implement basic structure for party polling numbers analytics
 - [x] Implement DataLoader dataclass to handle all data reading and manipulation
+- [x] Add trending hashtag horizons (e.g. last 5 days, 10 days)
+- [x] Implement CI/CD to automatically publish updated version of the app to Heroku
 - [ ] Add "% of" analytics on trending hashtags
-- [ ] Add trending hashtag horizons (e.g. last 5 days, 10 days)
 - [ ] Add vertical lines in line graphs to indicate significant events (e.g. debates)
 - [ ] Implement the possibility to supply twitter handles as input for the ML inference
-- [ ] Implement CI/CD to automatically publish updated version of the app to Heroku
+
 
 ### heroku stuff
 To access the app when it has been pushed to heroku, we need to expose the $PORT environment variable. 
